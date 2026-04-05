@@ -6,7 +6,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.naive_bayes import MultinomialNB
 
 # -------------------------------
-# Custom Styling (🔥 PREMIUM UI)
+# Custom Styling 
 # -------------------------------
 st.set_page_config(page_title="AI Spam Detector", page_icon="📧", layout="centered")
 
