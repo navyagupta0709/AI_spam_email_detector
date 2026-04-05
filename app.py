@@ -1,70 +1,85 @@
 import streamlit as st
-import pickle
+import pandas as pd
 import string
 
-# -------------------------------
-# Load model and vectorizer
-# -------------------------------
-try:
-    with open("spam_model.pkl", "rb") as f:
-        model = pickle.load(f)
-
-    with open("vectorizer.pkl", "rb") as f:
-        vectorizer = pickle.load(f)
-
-except Exception as e:
-    st.error("⚠️ Error loading model files. Make sure .pkl files are in the same folder.")
-    st.stop()
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.naive_bayes import MultinomialNB
 
 # -------------------------------
-# Stopwords (no nltk)
+# Sample Dataset (built-in)
+# -------------------------------
+data = {
+    "text": [
+        "Win money now!!!",
+        "Call me later",
+        "Congratulations you won a prize",
+        "Let's meet tomorrow",
+        "Free entry in 2 lakh prize",
+        "How are you doing",
+        "Claim your free reward now",
+        "Are we meeting today"
+    ],
+    "label": [1, 0, 1, 0, 1, 0, 1, 0]  # 1 = spam, 0 = not spam
+}
+
+df = pd.DataFrame(data)
+
+# -------------------------------
+# Stopwords
 # -------------------------------
 stop_words = set([
     'a','an','the','is','are','in','on','at','to','for','with','and','or','of',
-    'this','that','it','be','as','was','were','by','from','has','had','have',
-    'you','your','yours','me','my','we','our','he','she','they','them','his','her'
+    'this','that','it','be','as','was','were','by','from','has','had','have'
 ])
 
 # -------------------------------
-# Text preprocessing
+# Preprocessing
 # -------------------------------
 def transform_text(text):
     text = text.lower()
     words = text.split()
 
-    filtered_words = []
+    filtered = []
     for word in words:
         if word.isalnum() and word not in stop_words and word not in string.punctuation:
-            filtered_words.append(word)
+            filtered.append(word)
 
-    return " ".join(filtered_words)
+    return " ".join(filtered)
+
+# Apply preprocessing
+df["transformed_text"] = df["text"].apply(transform_text)
+
+# -------------------------------
+# Vectorization
+# -------------------------------
+vectorizer = TfidfVectorizer()
+X = vectorizer.fit_transform(df["transformed_text"])
+y = df["label"]
+
+# -------------------------------
+# Model Training
+# -------------------------------
+model = MultinomialNB()
+model.fit(X, y)
 
 # -------------------------------
 # Streamlit UI
 # -------------------------------
-st.set_page_config(page_title="Spam Email Detector", page_icon="📧")
+st.set_page_config(page_title="Spam Detector", page_icon="📧")
 
-st.title("📧 Spam Email Detector")
-st.markdown("Detect whether a message is **Spam 🚫** or **Not Spam ✅**")
+st.title("📧 Spam Email Detector (No PKL Version)")
+st.write("This model is trained live (no external files needed)")
 
-# Input box
-input_sms = st.text_area("✉️ Enter your message")
+input_sms = st.text_area("Enter your message")
 
-# Button
-if st.button("🔍 Predict"):
+if st.button("Predict"):
     if input_sms.strip() == "":
         st.warning("⚠️ Please enter a message")
     else:
-        # Preprocess
         transformed_sms = transform_text(input_sms)
-
-        # Vectorize
         vector_input = vectorizer.transform([transformed_sms])
-
-        # Predict
         result = model.predict(vector_input)[0]
 
-        # Output
         if result == 1:
             st.error("🚫 Spam Message")
         else:
