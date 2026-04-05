@@ -65,7 +65,7 @@ model.fit(X, y)
 st.set_page_config(page_title="AI Spam Detector", page_icon="📧")
 
 st.title("🤖 AI Spam Email Detector")
-st.write("This version uses Machine Learning (TF-IDF + Naive Bayes)")
+
 
 input_sms = st.text_area("Enter your message")
 
