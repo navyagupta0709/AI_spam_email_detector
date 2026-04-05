@@ -48,7 +48,6 @@ def predict_spam(text):
 st.set_page_config(page_title="Spam Detector", page_icon="📧")
 
 st.title("📧 Spam Email Detector")
-st.write("No ML libraries required (works everywhere ✅)")
 
 input_sms = st.text_area("Enter your message")
 
